@@ -9,7 +9,7 @@ Welcome to my data science portfolio! I am a data analyst with 3.5 years of expe
 - **Name:** Mark Lerret
 - **Location:** White River Junction, Vermont
 - **Email:** Mark@Lerret.us 
-- **LinkedIn:** [[Your LinkedIn Profile]  ](https://www.linkedin.com/in/marklerret/)
+- **LinkedIn:** https://www.linkedin.com/in/marklerret/
 - **Technical Skills:** Python, SQL, Machine Learning, Data Visualization (Tableau, Power BI), Statistical Analysis, A/B Testing  
 - **Tools:** Jupyter, Scikit-learn, Pandas, NumPy, Matplotlib, Seaborn, Git/GitHub
 
