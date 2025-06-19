@@ -33,7 +33,7 @@ Each project folder contains Jupyter notebooks with detailed explanations and co
 1. Clone this repository:  https://github.com/markalerret/portfolio.git
 2. Navigate to the project directory: cd churn_prediction
 3. Install Dependencies (recommended to use a virtual environment): pip install -r requirements.txt
-4. Open the notebook: jupyter notebook churn_analysis.ipynb
+4. Open the notebook: jupyter notebook notebooks\churn_analysis.ipynb
 
 ---
 
