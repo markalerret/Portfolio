@@ -192,15 +192,21 @@ def show_overview(df, model):
         st.error("Data not loaded. Please check your data file path.")
 
 def show_data_explorer(df):
-    """Data exploration page placeholder"""
-    st.markdown("## 🔍 Data Explorer")
-    st.info("This page will contain interactive data visualizations and exploration tools.")
-    
-    if df is not None:
-        st.dataframe(df.head(10), use_container_width=True)
-        st.markdown(f"**Dataset shape:** {df.shape[0]} rows × {df.shape[1]} columns")
-    else:
-        st.error("No data available to explore.")
+    """Import and use the enhanced data explorer"""
+    # Import the enhanced data explorer function
+    try:
+        from pages.data_explorer import show_data_explorer as enhanced_explorer
+        enhanced_explorer(df)
+    except ImportError:
+        # Fallback to basic version if the module doesn't exist yet
+        st.markdown("## 🔍 Data Explorer")
+        st.info("Enhanced data explorer coming soon! For now, here's your dataset:")
+        
+        if df is not None:
+            st.dataframe(df.head(10), use_container_width=True)
+            st.markdown(f"**Dataset shape:** {df.shape[0]} rows × {df.shape[1]} columns")
+        else:
+            st.error("No data available to explore.")
 
 def show_predictions(df, model):
     """Predictions page placeholder"""
