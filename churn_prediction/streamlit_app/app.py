@@ -4,229 +4,187 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle
-import sys
-import os
-from pathlib import Path
+import matplotlib.pyplot as plt
+import seaborn as sn
+import plotly.express as px
+import plotly.graph_objects as go
 
-# Add the project root to the path so we can import from src/
-project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
-
-# Page configuration
+# Page config
 st.set_page_config(
-    page_title="Telco Customer Churn Analysis",
-    page_icon="📊",
+    page_title="Customer Churn Analysis Dashboard",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state='expanded'
 )
 
-# Custom CSS for better styling
-st.markdown("""
-<style>
-    .main-header {
-        font-size: 2.5rem;
-        color: #1f77b4;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #1f77b4;
-    }
-    .sidebar .sidebar-content {
-        background-color: #f8f9fa;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Load data (you'll need to add your data loading here)
+@st.cache_data
+def load_data():
+    data = pd.read_csv("data/churn_prediction_data.csv")
+
+    # Data cleaning (Based on analysis)
+    # 1. TotalCharges
+    data.loc[data['tenure'] == 0, 'TotalCharges'] = '0'
+    data['TotalCharges'] = pd.to_numeric(data['TotalCharges'])
+
+    # 2. SeniorCitizen
+    data['SeniorCitizen'] = data['SeniorCitizen'].astype(str)
+
+    return data
 
 # Helper functions
 @st.cache_data
-def load_data():
-    """Load the dataset"""
-    try:
-        # Adjust path based on your actual data location
-        data_path = project_root / "data" / "churn_prediction_data.csv"
-        if data_path.exists():
-            df = pd.read_csv(data_path)
-            return df
-        else:
-            # Fallback: try to find the CSV file
-            st.error(f"Data file not found at {data_path}. Please check the file path.")
-            return None
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        return None
+def calculate_risk_scores():
+    """recalculate risk scores for dashboard"""
+    def calc_score(row):
+        score = 0
+        #Contract risk
+        if row['Contract'] == 'Month-to-month':
+            score += 3
+        elif row['Contract'] == 'One year':
+            score += 1
 
-@st.cache_resource
-def load_model():
-    """Load the trained model"""
-    try:
-        model_path = project_root / "models" / "churn_model.pkl"
-        if model_path.exists():
-            with open(model_path, 'rb') as f:
-                model = pickle.load(f)
-            return model
-        else:
-            st.warning("Model file not found. Some features may not work.")
-            return None
-    except Exception as e:
-        st.warning(f"Could not load model: {e}")
-        return None
+        #Payment risk
+        if row['PaymentMethod'] == 'Electronic check':
+            score += 2
+        elif row['PaymentMethod'] == 'Mailed check':
+            score += 1
 
+        #Service risk
+        if row['InternetService'] == 'Fiber optic':
+            score += 2
+        elif row['InternetService'] == 'DSL':
+            score += 1
+
+        return score
+
+    return data.apply(calc_score, axis=1)
+
+@st.cache_data
+def get_churn_by_category(data,column):
+    """Get churn rates by category for any column"""
+    return data.groupby(column)['Churn'].apply(lambda x: (x == 'Yes').mean())
+
+
+# Main Navigation
 def main():
-    # Main title
-    st.markdown('<h1 class="main-header">📊 Telco Customer Churn Analysis Dashboard</h1>', unsafe_allow_html=True)
-    
+    st.title("Customer Churn Analysis Dashboard")
+
+    # Load data
+    data = load_data()
+    if data is None:
+        st.stop() #Stop execution if data doesn't load
+
+    st.markdown("---")
+
     # Sidebar navigation
-    st.sidebar.title("🧭 Navigation")
-    st.sidebar.markdown("---")
-    
+    st.sidebar.title("Navigation")
     pages = {
-        "🏠 Overview": "overview",
-        "🔍 Data Explorer": "data_explorer", 
-        "🎯 Make Predictions": "predictions",
-        "📈 Model Performance": "model_performance",
-        "💼 Business Insights": "business_insights"
+        "Executive Summary": show_executive_summary,
+        "Data Overview": show_data_overview,
+        "Key Churn Drivers": show_key_drivers,
+        "Fiber Optic Deep Dive": show_fiber_analysis,
+        "Risk Score Analysis": show_risk_analysis,
+        "Business Recommendations": show_recommendations
     }
+
+    selected_page = st.sidebar.radio("Select Page", list(pages.keys()))
+
+    #Display selected page
+    pages[selected_page]()
+
+#Page functions
+def show_executive_summary():
+    st.header("Executive Summary")
+
+    # Load and test the data
+    data = load_data()
+
+    # Display basic data info to confirm it's working
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.metric("Total Customers", f"{len(data):,}")
+
+    with col2:
+        churn_rate = (data['Churn'] == 'Yes').mean()
+        st.metric("Churn Rate", f"{churn_rate:.1%}")
+
+    with col3:
+        avg_tenure = data['tenure'].mean()
+        st.metric("Avg Tenure (Months)", f"{avg_tenure:.1f}")
+
+    with col4:
+        avg_monthly = data['MonthlyCharges'].mean()
+        st.metric("Avg Monthly Charges", f"${avg_monthly:.0f}")
+
+    st.markdown("---")
+
+    st.markdown("""
+    ## Customer Churn Analysis - Key Findings
+
+    **Dataset**: 7,043 customers, 27% churn rate
+
+    **Top Churn Drivers**:
+    1. **Contract Type**: Month-to-month customers churn at 42.7% vs 2.8% for two-year contracts
+    2. **Payment Method**: Electronic check customers churn at 45.3% vs 15.2% for automatic payments
+    3. **Internet Service**: Fiber optic customers churn at 41.9% despite premium pricing
+
+    **Major Business Insight**: Fiber optic customers reporesent a "perfect storm" of risk factors
+    - 69% have month-to-month contracts
+    - 52% pay by electronic check
+    - 89.7% pay premium prices ($70-$110/month)
+    - Result: Compound risk leading to high churn
+
+    **Risk Model**: Risk scores 0-7 show exponential churn increase (7% to 60%)
+    """)
+
+def show_data_overview():
+    st.header("Data Overview")
+    st.write()
+
+
+def show_key_drivers():
+    st.header("Key Churn Drivers")
     
-    selected_page = st.sidebar.selectbox("Select a page:", list(pages.keys()))
-    
-    # Add some sidebar info
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### About This Project")
-    st.sidebar.info(
-        "This dashboard analyzes customer churn patterns using machine learning "
-        "to help businesses identify at-risk customers and develop retention strategies."
+    data = load_data()
+
+    #Quick interactive chart - Contract Type churn rates
+    st.subheader("Contract Type vs Churn Rate")
+
+    contract_churn = get_churn_by_category(data, 'Contract')
+
+    #Show the actual numbers
+    st.write("**Exact Churn Rates:**")
+    for contract, rate in contract_churn.items():
+        st.write(f"- {contract}: {rate:.1%}")
+
+    #Create a simple bar chart
+    fig = px.bar(
+        x=contract_churn.index.tolist(),
+        y=contract_churn.values.tolist(),
+        title="Churn Rate by Contract Type",
+        labels={'x': 'Contract Type', 'y': 'Churn Rate'},
+        color=contract_churn.values,
+        color_continuous_scale='Reds'
     )
-    
-    # Load data once
-    df = load_data()
-    model = load_model()
-    
-    # Route to different pages
-    page_name = pages[selected_page]
-    
-    if page_name == "overview":
-        show_overview(df, model)
-    elif page_name == "data_explorer":
-        show_data_explorer(df)
-    elif page_name == "predictions":
-        show_predictions(df, model)
-    elif page_name == "model_performance":
-        show_model_performance(df, model)
-    elif page_name == "business_insights":
-        show_business_insights(df, model)
+    fig.update_layout(showlegend=False)
 
-def show_overview(df, model):
-    """Overview/Home page"""
-    st.markdown("## 📋 Project Overview")
-    
-    if df is not None:
-        # Key metrics in columns
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            total_customers = len(df)
-            st.metric("Total Customers", f"{total_customers:,}")
-        
-        with col2:
-            if 'Churn' in df.columns:
-                churn_rate = (df['Churn'].value_counts().get('Yes', 0) / len(df)) * 100
-                st.metric("Churn Rate", f"{churn_rate:.1f}%")
-            else:
-                st.metric("Churn Rate", "N/A")
-        
-        with col3:
-            if model is not None:
-                st.metric("Model Status", "✅ Loaded")
-            else:
-                st.metric("Model Status", "❌ Not Found")
-        
-        with col4:
-            if df is not None:
-                st.metric("Features", f"{len(df.columns)}")
-            else:
-                st.metric("Features", "N/A")
-        
-        st.markdown("---")
-        
-        # Project description
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            st.markdown("""
-            ### 🎯 Project Objectives
-            
-            This project analyzes customer churn patterns in the telecommunications industry using machine learning techniques. The dashboard provides:
-            
-            - **Interactive data exploration** to understand customer behavior patterns
-            - **Real-time predictions** for individual customers or batch processing
-            - **Model performance metrics** to evaluate prediction accuracy
-            - **Business insights** and actionable recommendations for customer retention
-            
-            ### 📊 Dataset Information
-            
-            The analysis uses the Telco Customer Churn dataset, which contains information about:
-            - Customer demographics and account information
-            - Services subscribed to by customers
-            - Customer account status and churn behavior
-            """)
-        
-        with col2:
-            st.markdown("### 🚀 Quick Start")
-            st.markdown("""
-            1. **Explore Data**: Navigate to the Data Explorer to understand the dataset
-            2. **Make Predictions**: Use the prediction tool to forecast customer churn
-            3. **View Performance**: Check model accuracy and metrics
-            4. **Get Insights**: Review business recommendations
-            """)
-            
-            if df is not None:
-                st.markdown("### 📈 Dataset Preview")
-                st.dataframe(df.head(3), use_container_width=True)
-    
-    else:
-        st.error("Data not loaded. Please check your data file path.")
+    st.plotly_chart(fig, use_container_width=True)
 
-def show_data_explorer(df):
-    """Import and use the enhanced data explorer"""
-    # Import the enhanced data explorer function
-    try:
-        from pages.data_explorer import show_data_explorer as enhanced_explorer
-        enhanced_explorer(df)
-    except ImportError:
-        # Fallback to basic version if the module doesn't exist yet
-        st.markdown("## 🔍 Data Explorer")
-        st.info("Enhanced data explorer coming soon! For now, here's your dataset:")
-        
-        if df is not None:
-            st.dataframe(df.head(10), use_container_width=True)
-            st.markdown(f"**Dataset shape:** {df.shape[0]} rows × {df.shape[1]} columns")
-        else:
-            st.error("No data available to explore.")
 
-def show_predictions(df, model):
-    """Predictions page placeholder"""
-    st.markdown("## 🎯 Make Predictions")
-    st.info("This page will contain the prediction interface for individual customers and batch processing.")
-    
-    if model is None:
-        st.warning("Model not available. Please train and save a model first.")
-    else:
-        st.success("Model loaded successfully! Prediction interface coming soon.")
+def show_fiber_analysis():
+    st.header("Fiber Optic Deep Dive")
+    st.write()
 
-def show_model_performance(df, model):
-    """Model performance page placeholder"""
-    st.markdown("## 📈 Model Performance")
-    st.info("This page will show model metrics, confusion matrices, and performance visualizations.")
 
-def show_business_insights(df, model):
-    """Business insights page placeholder"""
-    st.markdown("## 💼 Business Insights")
-    st.info("This page will contain actionable business recommendations and customer segmentation analysis.")
+def show_risk_analysis():
+    st.header("Risk Score Analysis")
+    st.write()
+
+
+def show_recommendations():
+    st.header("Business Recommendations")
+    st.write()
 
 if __name__ == "__main__":
     main()
