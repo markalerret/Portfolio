@@ -148,28 +148,95 @@ def show_key_drivers():
     
     data = load_data()
 
-    #Quick interactive chart - Contract Type churn rates
-    st.subheader("Contract Type vs Churn Rate")
+    st.markdown("""
+    Analysis of categorical variables reveals three primary drivers of customer churn,
+    each representing different aspects of customer behavior and service preferences.
+    """)
 
-    contract_churn = get_churn_by_category(data, 'Contract')
+    # Create three columns for the charts
+    col1, col2, col3 = st.columns(3)
 
-    #Show the actual numbers
-    st.write("**Exact Churn Rates:**")
-    for contract, rate in contract_churn.items():
-        st.write(f"- {contract}: {rate:.1%}")
+    with col1:
+        st.subheader("Contract Type")
+        contract_churn = get_churn_by_category(data, "Contract")
 
-    #Create a simple bar chart
-    fig = px.bar(
-        x=contract_churn.index.tolist(),
-        y=contract_churn.values.tolist(),
-        title="Churn Rate by Contract Type",
-        labels={'x': 'Contract Type', 'y': 'Churn Rate'},
-        color=contract_churn.values,
-        color_continuous_scale='Reds'
-    )
-    fig.update_layout(showlegend=False)
+        fig1 = px.bar(
+            x = contract_churn.index.tolist(),
+            y = contract_churn.values.tolist(),
+            labels = {'x': 'Contract Type', 'y':'Churn Rate'},
+            color = contract_churn.values,
+            color_continuous_scale='Reds'
+        )
+        fig1.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig1, use_container_width=True)
 
-    st.plotly_chart(fig, use_container_width=True)
+        st.write("Churn Rates:")
+        for contract, rate in contract_churn.items():
+            st.write(f"{contract}: {rate:.1%}")
+
+    with col2:
+        st.subheader("Payment Method")
+        payment_churn = get_churn_by_category(data, 'PaymentMethod')
+
+        fig2 = px.bar(
+            x = payment_churn.index.tolist(),
+            y = payment_churn.values.tolist(),
+            labels = {'x': 'Payment Method', 'y': 'Churn Rate'},
+            color = payment_churn.values,
+            color_continuous_scale = 'Blues'
+        )
+        fig2.update_layout(showlegend=False, height=400)
+        fig2.update_xaxes(tickangle=45)
+        st.plotly_chart(fig2, use_container_width=True)
+
+        st.write("Churn Rates:")
+        for payment, rate in payment_churn.items():
+            st.write(f"{payment}: {rate:.1%}")
+
+    with col3:
+        st.subheader("Internet Service")
+        internet_churn = get_churn_by_category(data, 'InternetService')
+
+        fig3 = px.bar(
+            x = internet_churn.index.tolist(),
+            y = internet_churn.values.tolist(),
+            labels = {'x': 'Internet Service', 'y': 'Churn Rate'},
+            color = internet_churn.values,
+            color_continuous_scale = 'Greens'
+        )
+        fig3.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig3, use_container_width=True)
+
+        st.write("Churn Rates:")
+        for service, rate in internet_churn.items():
+            st.write(f"{service}: {rate:.1%}")
+
+    # Add summart insights
+    st.markdown("---")
+    st.subheader("Key Insights")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info("""
+        Contract Commitment Effect
+                
+        Month-to-month customers show 15x higher churn that two-year customers, highlighting the importance of customer commitment.        
+        """)
+
+    with col2:
+        st.info("""
+        Payment Method Signal
+                
+        Automatic payment methods correlate with 3x better retention, suggesting customer engagement level affects churn risk.
+        """)
+
+    with col3:
+        st.info("""
+        Service Paradox
+                
+        Premium fiber service shows highest churn despite higher pricing, indicating potential value perception issues.
+        """)
 
 
 def show_fiber_analysis():
