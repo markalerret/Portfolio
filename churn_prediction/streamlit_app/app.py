@@ -153,11 +153,12 @@ def show_key_drivers():
     each representing different aspects of customer behavior and service preferences.
     """)
 
+
     # Create three columns for the charts
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.subheader("Contract Type")
+        st.subheader("Contract Types")
         contract_churn = get_churn_by_category(data, "Contract")
 
         fig1 = px.bar(
@@ -167,7 +168,21 @@ def show_key_drivers():
             color = contract_churn.values,
             color_continuous_scale='Reds'
         )
-        fig1.update_layout(showlegend=False, height=400)
+        fig1.update_layout(
+            showlegend=False, 
+            height=400,
+            margin=dict(l=60, r=60, t=40, b=120),
+            xaxis=dict(
+                title = "",
+                tickangle=45,
+                tickfont=dict(size=10),
+                automargin=False
+            ),
+            yaxis=dict(
+                tickfont=dict(size=10),
+                automargin=False
+            ),
+        )
         st.plotly_chart(fig1, use_container_width=True)
 
         st.write("Churn Rates:")
@@ -175,7 +190,7 @@ def show_key_drivers():
             st.write(f"{contract}: {rate:.1%}")
 
     with col2:
-        st.subheader("Payment Method")
+        st.subheader("Payment Methods")
         payment_churn = get_churn_by_category(data, 'PaymentMethod')
 
         fig2 = px.bar(
@@ -185,8 +200,21 @@ def show_key_drivers():
             color = payment_churn.values,
             color_continuous_scale = 'Blues'
         )
-        fig2.update_layout(showlegend=False, height=400)
-        fig2.update_xaxes(tickangle=45)
+        fig2.update_layout(
+            showlegend=False, 
+            height=400,
+            margin=dict(l=60, r=60, t=25, b=120),
+            xaxis=dict(
+                title="",
+                tickangle=45,
+                tickfont=dict(size=10),
+                automargin=False
+            ),
+            yaxis=dict(
+                tickfont=dict(size=10),
+                automargin=False
+            ),
+        )
         st.plotly_chart(fig2, use_container_width=True)
 
         st.write("Churn Rates:")
@@ -204,7 +232,21 @@ def show_key_drivers():
             color = internet_churn.values,
             color_continuous_scale = 'Greens'
         )
-        fig3.update_layout(showlegend=False, height=400)
+        fig3.update_layout(
+            showlegend=False, 
+            height=400,
+            margin=dict(l=60, r=60, t=40, b=120),
+            xaxis=dict(
+                title="",
+                tickangle=45,
+                tickfont=dict(size=10),
+                automargin=False
+            ),
+            yaxis=dict(
+                tickfont=dict(size=10),
+                automargin=False
+            ),
+        )
         st.plotly_chart(fig3, use_container_width=True)
 
         st.write("Churn Rates:")
