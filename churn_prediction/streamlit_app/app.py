@@ -140,7 +140,82 @@ def show_executive_summary():
 
 def show_data_overview():
     st.header("Data Overview")
-    st.write()
+    
+    data=load_data()
+
+    # Dataset characteristics section
+    st.subheader("Dataset Characteristics")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.metric("Total Customers", f"{len(data)}")
+
+    with col2:
+        st.metric("Total Features", len(data.columns))
+
+    with col3:
+        churn_rate = (data['Churn'] == 'Yes').mean()
+        st.metric("Overall Churn Rate", f"{churn_rate:.1%}")
+
+    with col4:
+        avg_tenure = data['tenure'].mean()
+        st.metric("Average Tenure", f"{avg_tenure:.1f} months")
+
+    st.markdown("---")
+
+    # Data types breakdown
+    st.subheader("Data Types & Structure")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("Categorical Variables (16):")
+        categorical_cols = data.select_dtypes(include=['object']).columns.tolist()
+        categorical_cols.remove('customerID') #remove ID column
+        categorical_cols.remove('Churn') #remove churn column
+        for col in categorical_cols:
+            unique_count = data[col].nunique()
+            st.write(f"{col}: {unique_count} unique values")
+
+        st.write("")
+
+        #Add target variable separately
+        st.write("Target Variable")
+        st.write(f"Churn: {data['Churn'].nunique()} classes (Yes/No)")
+
+    with col2:
+        st.write("Numerical Variables (3):")
+        numerical_cols = data[['tenure', 'MonthlyCharges', 'TotalCharges']].describe()
+        st.dataframe(numerical_cols.round(2))
+
+    st.markdown("---")
+
+    #Data quality section
+    st.subheader("Data Quality Assessment")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.success("Quality Checks Passed:")
+        st.write("- No missing values after cleaning")
+        st.write("- No duplicate records")
+        st.write("- Business Logic Validated")
+        st.write("- Data Types Corrected")
+
+    with col2:
+        st.info("Data Cleaning Applied:")
+        st.write("- TotalCharges Issue: 11 customers with 0 tenure had empty TotalCharges")
+        st.write("- Root Cause: New customers haven't accumulated charges")
+        st.write("- Solution: Set TotalCharges = 0 for tenure = 0 customers")
+        st.write("- Validation: Confirmed business logic consistency")
+
+    st.markdown("---")
+
+    # Sample data preview
+    st.subheader("Sample Data Preview")
+    st.write("First 10 rows of the cleaned dataset:")
+    st.dataframe(data.head(10))
 
 
 def show_key_drivers():
@@ -153,12 +228,19 @@ def show_key_drivers():
     each representing different aspects of customer behavior and service preferences.
     """)
 
+    #Create headers above the columns
+    header_col1, header_col2, header_col3 = st.columns(3)
+    with header_col1:
+        st.markdown("<h4 style-'text-align=center; margin-bottom: 10px;'>Contract Type</h4>", unsafe_allow_html=True)
+    with header_col2:
+        st.markdown("<h4 style-'text-align=center; margin-bottom: 10px;'>Payment Method</h4>", unsafe_allow_html=True)
+    with header_col3:
+        st.markdown("<h4 style-'text-align=center; margin-bottom: 10px;'>Internet Service</h4>", unsafe_allow_html=True)
 
     # Create three columns for the charts
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.subheader("Contract Types")
         contract_churn = get_churn_by_category(data, "Contract")
 
         fig1 = px.bar(
@@ -190,7 +272,6 @@ def show_key_drivers():
             st.write(f"{contract}: {rate:.1%}")
 
     with col2:
-        st.subheader("Payment Methods")
         payment_churn = get_churn_by_category(data, 'PaymentMethod')
 
         fig2 = px.bar(
@@ -222,7 +303,6 @@ def show_key_drivers():
             st.write(f"{payment}: {rate:.1%}")
 
     with col3:
-        st.subheader("Internet Service")
         internet_churn = get_churn_by_category(data, 'InternetService')
 
         fig3 = px.bar(
