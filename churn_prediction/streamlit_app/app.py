@@ -363,7 +363,73 @@ def show_key_drivers():
 
 def show_fiber_analysis():
     st.header("Fiber Optic Deep Dive")
-    st.write()
+    
+    data = load_data()
+
+    # Introduction
+    st.markdown("""
+    The 'Perfect Storm' Discovery
+                
+    Fiber Optic customers don't just have high churn, they stack multiple risk factors that compound into a business problem.
+    """)
+
+    st.markdown("---")
+
+    # Key metrics section
+    st.subheader("Fiber Customer Risk Profile")
+
+    fiber_data = data[data['InternetService'] == 'Fiber optic']
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.metric("Total Fiber Customers", f"{len(fiber_data):,}")
+
+    with col2:
+        fiber_churn = (fiber_data['Churn'] == 'Yes').mean()
+        st.metric("Fiber Churn Rate", f"{fiber_churn:.1%}")
+
+    with col3:
+        month_to_month_pct = (fiber_data['Contract'] == 'Month-to-month').mean()
+        st.metric("Month-to-Month", f"{month_to_month_pct:.1%}")
+
+    with col4:
+        electronic_check_pct = (fiber_data['PaymentMethod'] == 'Electronic check').mean()
+        st.metric("Electronic Check", f"{electronic_check_pct:.1%}")
+
+    st.markdown("---")
+
+    # Comparison visualization
+    st.subheader("Fiber vs Non-fiber Customer Comparison")
+
+    # Create comparison data
+    comparison_metrics = {
+        'Customer Type': ['Fiber Optic', 'Non-Fiber'],
+        'Churn Rate': [
+            (data[data['InternetService'] == 'Fiber optic']['Churn'] == 'Yes').mean(),
+            (data[data['InternetService'] != 'Fiber optic']['Churn'] == 'Yes').mean()
+        ],
+        'Month-to-month %': [
+            (data[data['InternetService'] == 'Fiber optic']['Contract'] == 'Month-to-month').mean(),
+            (data[data['InternetService'] != 'Fiber optic']['Contract'] == 'Month-to-month').mean()
+        ],
+        'Electronic Check %': [
+            (data[data['InternetService'] == 'Fiber optic']['PaymentMethod'] == 'Electronic check').mean(),
+            (data[data['InternetService'] != 'Fiber optic']['PaymentMethod'] == 'Electronic check').mean()
+        ]
+    }
+
+    # Create comparison chart
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        name='Fiber Optic',
+        x=['Churn Rate', 'Month-to-Month %', 'Electronic Check %'],
+        y=[comparison_metrics['Churn Rate'][0],
+           comparison_metrics['Month-to-month %'][0],
+           comparison_metrics['Electronic Check %'][0]],
+        marker_color='lightcoral'
+    ))
 
 
 def show_risk_analysis():
