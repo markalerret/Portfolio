@@ -265,6 +265,9 @@ def show_key_drivers():
                 automargin=False
             ),
         )
+        # Format y-axis as percentage
+        fig1.update_yaxes(tickformat='.0%')
+
         st.plotly_chart(fig1, use_container_width=True)
 
         st.write("Churn Rates:")
@@ -296,6 +299,9 @@ def show_key_drivers():
                 automargin=False
             ),
         )
+        # Format y-axis as percentage
+        fig2.update_yaxes(tickformat='.0%')
+
         st.plotly_chart(fig2, use_container_width=True)
 
         st.write("Churn Rates:")
@@ -327,6 +333,9 @@ def show_key_drivers():
                 automargin=False
             ),
         )
+        # Format y-axis as percentage
+        fig3.update_yaxes(tickformat='.0%')
+
         st.plotly_chart(fig3, use_container_width=True)
 
         st.write("Churn Rates:")
@@ -409,7 +418,7 @@ def show_fiber_analysis():
             (data[data['InternetService'] == 'Fiber optic']['Churn'] == 'Yes').mean(),
             (data[data['InternetService'] != 'Fiber optic']['Churn'] == 'Yes').mean()
         ],
-        'Month-to-month %': [
+        'Month-to-Month %': [
             (data[data['InternetService'] == 'Fiber optic']['Contract'] == 'Month-to-month').mean(),
             (data[data['InternetService'] != 'Fiber optic']['Contract'] == 'Month-to-month').mean()
         ],
@@ -424,12 +433,90 @@ def show_fiber_analysis():
 
     fig.add_trace(go.Bar(
         name='Fiber Optic',
-        x=['Churn Rate', 'Month-to-Month %', 'Electronic Check %'],
+        x=['Churn Rate', 'Month-to-Month', 'Electronic Check'],
         y=[comparison_metrics['Churn Rate'][0],
-           comparison_metrics['Month-to-month %'][0],
+           comparison_metrics['Month-to-Month %'][0],
            comparison_metrics['Electronic Check %'][0]],
         marker_color='lightcoral'
     ))
+
+    fig.add_trace(go.Bar(
+        name='Non-Fiber',
+        x=['Churn Rate', 'Month-to-Month', 'Electronic Check'],
+        y=[comparison_metrics['Churn Rate'][1],
+           comparison_metrics['Month-to-Month %'][1],
+           comparison_metrics['Electronic Check %'][1]],
+        marker_color='lightblue'
+    ))
+    
+    fig.update_layout(
+        title='Fiber vs Non-Fiber Customer Risk Factors',
+        barmode='group',
+        yaxis_title='Percentage',
+        height=400
+    )
+
+    # Format y-axis as percentage
+    fig.update_yaxes(tickformat='.0%')
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("---")
+
+    # Key insights
+    st.subheader("Root Cause Analysis")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.error("""
+        The Problem:
+                 
+        - Customer Acquisition Issue: Fiber sevice attracts price-sensitive, commitment-averse customers
+                 
+        - Compound Risk Factors: Fiber customers stack multiple high-risk behaviors
+        
+        - Premium Service Paradox: Highest-priced service has highest churn
+        """)
+
+    with col2:
+        st.success(r"""
+        Why This Matters:
+                   
+        - Explains Other Patterns: Electronic check and \$70-\$110 churn driven by fiber overlap
+                   
+        - Business Impact: 89.7% of fiber customers pay \$70-\$110/month
+                   
+        - Strategic Insight: Problem is customer profile, not service quality
+        """)
+
+    st.markdown("---")
+
+    # Business Recommendations
+    st.subheader("Strategic Recommendations")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info("""
+        Fix Acquisition
+                
+        Target contract-willing customers for fiber service
+        """)
+
+    with col2:
+        st.info("""
+        Payment Incentives
+                
+        Push Automatic payments for fiber customers
+        """)
+
+    with col3:
+        st.info("""
+        Contract Incentives
+                
+        Offer discounts for fiber + contract combinations
+        """)
 
 
 def show_risk_analysis():
