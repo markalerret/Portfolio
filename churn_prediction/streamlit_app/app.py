@@ -160,7 +160,7 @@ def show_data_overview():
 
     with col4:
         avg_tenure = data['tenure'].mean()
-        st.metric("Average Tenure", f"{avg_tenure:.1f} months")
+        st.metric("Average Tenure", f"{avg_tenure:.1f} mos.")
 
     st.markdown("---")
 
