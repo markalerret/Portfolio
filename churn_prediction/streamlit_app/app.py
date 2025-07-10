@@ -33,7 +33,7 @@ def load_data():
 
 # Helper functions
 @st.cache_data
-def calculate_risk_scores():
+def calculate_risk_scores(data):
     """recalculate risk scores for dashboard"""
     def calc_score(row):
         score = 0
@@ -58,6 +58,19 @@ def calculate_risk_scores():
         return score
 
     return data.apply(calc_score, axis=1)
+
+@st.cache_data
+def get_risk_score_distribution(data):
+    """Get risk score distribution for dashboard"""
+    risk_scores = calculate_risk_scores(data)
+    risk_churn = data.groupby(risk_scores)['Churn'].apply(lambda x: (x == 'Yes').mean())
+    risk_counts = risk_scores.value_counts().sort_index()
+
+    return {
+        'scores': risk_churn.index.tolist(),
+        'churn_rates': risk_churn.values.tolist(),
+        'customer_counts': [risk_counts[score] for score in risk_churn.index]
+    }
 
 @st.cache_data
 def get_churn_by_category(data,column):
@@ -521,7 +534,186 @@ def show_fiber_analysis():
 
 def show_risk_analysis():
     st.header("Risk Score Analysis")
-    st.write()
+    
+    data = load_data()
+
+    # Introduction
+    st.markdown("""
+    Quantifying Compound Risk
+
+    Created a composite risk score (0-7) to demonstrate how multiple churn factors compound together, not just add up individually.    
+
+
+    """)
+
+    st.markdown("---")
+
+    # Risk scoring methodology
+    st.subheader("Risk Scoring Model")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info("""
+        Contract Risk (0-3 points)
+                
+        - Two year: 0 points
+        - One year: 1 point
+        - Month-to-month: 3 points
+        """)
+
+    with col2:
+        st.info("""
+        Payment Risk (0-2 points)
+                
+        - Automatic payments: 0 points
+        - Mailed check: 1 point
+        - Electronic check: 2 points
+        """)
+
+    with col3:
+        st.info("""
+        Service Risk (0-2 points)
+                
+        - No internet: 0 points
+        - DSL: 1 point
+        - Fiber optic: 2 points
+        """)
+
+    st.markdown("---")
+
+    # Calculate risk scores
+    risk_scores = calculate_risk_scores(data)
+    risk_data = get_risk_score_distribution(data)
+
+    # Risk score distribution
+    st.subheader("Risk Score Distribution & Churn Rates")
+
+    col1, col2 = st.columns([2,1])
+
+    with col1:
+        # Create risk score visualization
+        fig = px.bar(
+            x=risk_data['scores'],
+            y=risk_data['churn_rates'],
+            title="Churn Rate by Risk Score",
+            labels={'x': 'Risk Score', 'y': 'Churn Rate'},
+            color=risk_data['churn_rates'],
+            color_continuous_scale='Reds'
+        )
+
+        fig.update_layout(
+            showlegend=False,
+            height=400,
+            xaxis_title="Risk Score",
+            yaxis_title="Churn Rate"
+        )
+
+        # Add customer count annotations
+        for i, (score, rate, count) in enumerate(zip(risk_data['scores'], risk_data['churn_rates'], risk_data['customer_counts'])):
+            fig.add_annotation(
+                x=score,
+                y=rate + 0.02,
+                text=f"{rate:.1%}",
+                showarrow=False,
+                font=dict(size=10, color='black')
+            )
+
+            fig.add_annotation(
+                x=score,
+                y=0.05,
+                text=f"n={count}",
+                showarrow=False,
+                font=dict(size=8, color='gray')
+            )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        st.write("Risk Score Breakdown:")
+        st.write("")
+
+        for score, rate, count in zip(risk_data['scores'], risk_data['churn_rates'], risk_data['customer_counts']):
+            st.write(f"Score {score}: {rate:.1%} churn")
+            st.write(f"({count:,} customers)")
+            st.write("")
+
+    st.markdown("---")
+
+    # Key insights
+    st.subheader("Key Findings")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.success("""
+        Exponential Risk Pattern
+                   
+        - Low Risk (0-2): 7-15% churn rates
+        - Medium Risk (3-5): 20-35% churn rates
+        - High Risk (6-7): 45-60% churn rates
+                   
+        Risk Compounds exponentially, not linearly
+        """)
+
+    with col2:
+        lowest_churn = min(risk_data['churn_rates'])
+        highest_churn = max(risk_data['churn_rates'])
+        risk_multiplier = highest_churn/lowest_churn
+
+        st.error("""
+        Extreme Risk Customers
+                 
+        - Highest Risk Customers have {risk_multiplier:.1f}x higher churn rates than lowest risk
+        - Score 7 customers: {highest_churn:,1%} churn rate
+        - Score 0 customers: {lowest_churn:.1%} churn rate
+                 
+        Immediate intervention needed for high-risk scores
+        """)
+
+    st.markdown("---")
+
+    # Business applications
+    st.subheader("Business Applications")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info("""
+        Targeted Retention
+                
+        - Score 6-7: Immediate intervention with personal calls, retention offers, and account manager assignment
+        - Score 4-5: Proactive outreach through email campaigns, service reviews, and upgrade incentives
+        - Score 0-3: Standard loyalty programs with rewards points, referral bonuses, and upsell opportunities
+        """)
+
+    with col2:
+        st.info("""
+        Customer Segmentation
+                
+        - Risk based pricing: Offer 10-20% discounts to high-risk customers to improve retention
+        - Customized service levels: High-risk customers get priority support and dedicated account managers
+        - Differentiated communication: Tailor messaging frequency and channel based on risk profile
+        """)
+
+    with col3:
+        st.info("""
+        Predictive Modeling
+                
+        - Feature engineering foundation: Risk score can be used as input variable in machine learning models
+        - Model input variable: Compare ML predictions against risk score to ensure business logic alignment
+        - Business rule validation: Deploy risk score calculation for real-time customer assessment
+        """)
+
+    # Risk score implications
+    st.markdown("---")
+
+    high_risk_count = sum([count for score, count in zip(risk_data['scores'], risk_data['customer_counts']) if score>= 6])
+    total_customers = sum(risk_data['customer_counts'])
+
+    st.warning(f"""
+    Strategic Insight: {high_risk_count:,} customers ({high_risk_count/total_customers:.1%} of total) have risk scores of 6 or higher, representing the highest-priority segment for immediate retention efforts.
+    """)
 
 
 def show_recommendations():
