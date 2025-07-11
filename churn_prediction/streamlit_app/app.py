@@ -139,16 +139,16 @@ def show_executive_summary():
 
     **Top Churn Drivers**:
     1. **Contract Type**: Month-to-month customers churn at 42.7% vs 2.8% for two-year contracts
-    2. **Payment Method**: Electronic check customers churn at 45.3% vs 15.2% for automatic payments
+    2. **Payment Method**: Electronic check customers churn at 45.3% vs 15.2% for automatic credit card payments and 16.7% for automatic bank transfer payments
     3. **Internet Service**: Fiber optic customers churn at 41.9% despite premium pricing
 
-    **Major Business Insight**: Fiber optic customers reporesent a "perfect storm" of risk factors
+    **Major Business Insight**: Fiber optic customers represent a "perfect storm" of risk factors
     - 69% have month-to-month contracts
     - 52% pay by electronic check
-    - 89.7% pay premium prices ($70-$110/month)
-    - Result: Compound risk leading to high churn
+    - 89.7% pay premium prices ($70-110/month)
+    - **Result**: Compound risk leading to high churn
 
-    **Risk Model**: Risk scores 0-7 show exponential churn increase (7% to 60%)
+    **Risk Model**: Risk scores 0-7 show exponential churn increase (1% to 60%)
     """)
 
 def show_data_overview():
@@ -162,7 +162,7 @@ def show_data_overview():
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("Total Customers", f"{len(data)}")
+        st.metric("Total Customers", f"{len(data):,}")
 
     with col2:
         st.metric("Total Features", len(data.columns))
@@ -173,7 +173,7 @@ def show_data_overview():
 
     with col4:
         avg_tenure = data['tenure'].mean()
-        st.metric("Average Tenure", f"{avg_tenure:.1f} mos.")
+        st.metric("Average Tenure (Months)", f"{avg_tenure:.1f}")
 
     st.markdown("---")
 
@@ -183,7 +183,7 @@ def show_data_overview():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.write("Categorical Variables (16):")
+        st.write("**Categorical Variables (16)**:")
         categorical_cols = data.select_dtypes(include=['object']).columns.tolist()
         categorical_cols.remove('customerID') #remove ID column
         categorical_cols.remove('Churn') #remove churn column
@@ -194,11 +194,11 @@ def show_data_overview():
         st.write("")
 
         #Add target variable separately
-        st.write("Target Variable")
+        st.write("**Target Variable**")
         st.write(f"Churn: {data['Churn'].nunique()} classes (Yes/No)")
 
     with col2:
-        st.write("Numerical Variables (3):")
+        st.write("**Numerical Variables (3)**:")
         numerical_cols = data[['tenure', 'MonthlyCharges', 'TotalCharges']].describe()
         st.dataframe(numerical_cols.round(2))
 
@@ -210,18 +210,18 @@ def show_data_overview():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.success("Quality Checks Passed:")
+        st.success("**Quality Checks Passed**:")
         st.write("- No missing values after cleaning")
         st.write("- No duplicate records")
         st.write("- Business Logic Validated")
         st.write("- Data Types Corrected")
 
     with col2:
-        st.info("Data Cleaning Applied:")
-        st.write("- TotalCharges Issue: 11 customers with 0 tenure had empty TotalCharges")
-        st.write("- Root Cause: New customers haven't accumulated charges")
-        st.write("- Solution: Set TotalCharges = 0 for tenure = 0 customers")
-        st.write("- Validation: Confirmed business logic consistency")
+        st.info("**Data Cleaning Applied**:")
+        st.write("- **TotalCharges Issue**: 11 customers with 0 tenure had empty TotalCharges")
+        st.write("- **Root Cause**: New customers haven't accumulated charges")
+        st.write("- **Solution**: Set TotalCharges = 0 for tenure = 0 customers")
+        st.write("- **Validation**: Confirmed business logic consistency")
 
     st.markdown("---")
 
@@ -283,7 +283,7 @@ def show_key_drivers():
 
         st.plotly_chart(fig1, use_container_width=True)
 
-        st.write("Churn Rates:")
+        st.write("**Churn Rates**:")
         for contract, rate in contract_churn.items():
             st.write(f"{contract}: {rate:.1%}")
 
@@ -317,7 +317,7 @@ def show_key_drivers():
 
         st.plotly_chart(fig2, use_container_width=True)
 
-        st.write("Churn Rates:")
+        st.write("**Churn Rates**:")
         for payment, rate in payment_churn.items():
             st.write(f"{payment}: {rate:.1%}")
 
@@ -351,7 +351,7 @@ def show_key_drivers():
 
         st.plotly_chart(fig3, use_container_width=True)
 
-        st.write("Churn Rates:")
+        st.write("**Churn Rates**:")
         for service, rate in internet_churn.items():
             st.write(f"{service}: {rate:.1%}")
 
@@ -363,21 +363,21 @@ def show_key_drivers():
 
     with col1:
         st.info("""
-        Contract Commitment Effect
+        **Contract Commitment Effect**
                 
         Month-to-month customers show 15x higher churn that two-year customers, highlighting the importance of customer commitment.        
         """)
 
     with col2:
         st.info("""
-        Payment Method Signal
+        **Payment Method Signal**
                 
         Automatic payment methods correlate with 3x better retention, suggesting customer engagement level affects churn risk.
         """)
 
     with col3:
         st.info("""
-        Service Paradox
+        **Service Paradox**
                 
         Premium fiber service shows highest churn despite higher pricing, indicating potential value perception issues.
         """)
@@ -390,7 +390,7 @@ def show_fiber_analysis():
 
     # Introduction
     st.markdown("""
-    The 'Perfect Storm' Discovery
+    **The 'Perfect Storm' Discovery**
                 
     Fiber Optic customers don't just have high churn, they stack multiple risk factors that compound into a business problem.
     """)
@@ -483,24 +483,24 @@ def show_fiber_analysis():
 
     with col1:
         st.error("""
-        The Problem:
+        **The Problem**:
                  
-        - Customer Acquisition Issue: Fiber sevice attracts price-sensitive, commitment-averse customers
+        - **Customer Acquisition Issue**: Fiber sevice attracts price-sensitive, commitment-averse customers
                  
-        - Compound Risk Factors: Fiber customers stack multiple high-risk behaviors
+        - **Compound Risk Factors**: Fiber customers stack multiple high-risk behaviors
         
-        - Premium Service Paradox: Highest-priced service has highest churn
+        - **Premium Service Paradox**: Highest-priced service has highest churn
         """)
 
     with col2:
         st.success(r"""
-        Why This Matters:
+        **Why This Matters**:
                    
-        - Explains Other Patterns: Electronic check and \$70-\$110 churn driven by fiber overlap
+        - **Explains Other Patterns**: Electronic check and $70-110 churn driven by fiber overlap
                    
-        - Business Impact: 89.7% of fiber customers pay \$70-\$110/month
+        - **Business Impact**: 89.7% of fiber customers pay $70-110/month
                    
-        - Strategic Insight: Problem is customer profile, not service quality
+        - **Strategic Insight**: Problem is customer profile, not service quality
         """)
 
     st.markdown("---")
@@ -512,21 +512,21 @@ def show_fiber_analysis():
 
     with col1:
         st.info("""
-        Fix Acquisition
+        **Fix Acquisition**
                 
         Target contract-willing customers for fiber service
         """)
 
     with col2:
         st.info("""
-        Payment Incentives
+        **Payment Incentives**
                 
         Push Automatic payments for fiber customers
         """)
 
     with col3:
         st.info("""
-        Contract Incentives
+        **Contract Incentives**
                 
         Offer discounts for fiber + contract combinations
         """)
@@ -539,11 +539,9 @@ def show_risk_analysis():
 
     # Introduction
     st.markdown("""
-    Quantifying Compound Risk
+    **Quantifying Compound Risk**
 
-    Created a composite risk score (0-7) to demonstrate how multiple churn factors compound together, not just add up individually.    
-
-
+    Created a composite risk score (0-7) to demonstrate how multiple churn factors compound together, not just add up individually.
     """)
 
     st.markdown("---")
@@ -555,7 +553,7 @@ def show_risk_analysis():
 
     with col1:
         st.info("""
-        Contract Risk (0-3 points)
+        **Contract Risk (0-3 points)**
                 
         - Two year: 0 points
         - One year: 1 point
@@ -564,7 +562,7 @@ def show_risk_analysis():
 
     with col2:
         st.info("""
-        Payment Risk (0-2 points)
+        **Payment Risk (0-2 points)**
                 
         - Automatic payments: 0 points
         - Mailed check: 1 point
@@ -573,7 +571,7 @@ def show_risk_analysis():
 
     with col3:
         st.info("""
-        Service Risk (0-2 points)
+        **Service Risk (0-2 points)**
                 
         - No internet: 0 points
         - DSL: 1 point
@@ -630,7 +628,7 @@ def show_risk_analysis():
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.write("Risk Score Breakdown:")
+        st.write("**Risk Score Breakdown**:")
         st.write("")
 
         for score, rate, count in zip(risk_data['scores'], risk_data['churn_rates'], risk_data['customer_counts']):
@@ -647,28 +645,28 @@ def show_risk_analysis():
 
     with col1:
         st.success("""
-        Exponential Risk Pattern
+        **Exponential Risk Pattern**
                    
-        - Low Risk (0-2): 7-15% churn rates
-        - Medium Risk (3-5): 20-35% churn rates
-        - High Risk (6-7): 45-60% churn rates
+        - **Low Risk (0-2)**: 1-6% churn rates
+        - **Medium Risk (3-5)**: 13-36% churn rates
+        - **High Risk (6-7)**: 44-60% churn rates
                    
-        Risk Compounds exponentially, not linearly
+        **Risk Compounds exponentially, not linearly**
         """)
 
     with col2:
-        lowest_churn = min(risk_data['churn_rates'])
-        highest_churn = max(risk_data['churn_rates'])
-        risk_multiplier = highest_churn/lowest_churn
+        lowest_churn_pct = 0.8
+        highest_churn_pct = 60.4
+        risk_multiplier = highest_churn_pct/lowest_churn_pct
 
-        st.error("""
-        Extreme Risk Customers
+        st.error(f"""
+        **Extreme Risk Customers**
                  
-        - Highest Risk Customers have {risk_multiplier:.1f}x higher churn rates than lowest risk
-        - Score 7 customers: {highest_churn:,1%} churn rate
-        - Score 0 customers: {lowest_churn:.1%} churn rate
+        - **Highest Risk Customers** have {risk_multiplier:.1f}x higher churn rates than lowest risk
+        - **Score 7 customers**: {highest_churn_pct:.1f}% churn rate
+        - **Score 0 customers**: {lowest_churn_pct:.1f}% churn rate
                  
-        Immediate intervention needed for high-risk scores
+        **Immediate intervention needed for high-risk scores**
         """)
 
     st.markdown("---")
@@ -680,29 +678,29 @@ def show_risk_analysis():
 
     with col1:
         st.info("""
-        Targeted Retention
+        **Targeted Retention**
                 
-        - Score 6-7: Immediate intervention with personal calls, retention offers, and account manager assignment
-        - Score 4-5: Proactive outreach through email campaigns, service reviews, and upgrade incentives
-        - Score 0-3: Standard loyalty programs with rewards points, referral bonuses, and upsell opportunities
+        - **Score 6-7**: Immediate intervention with personal calls, retention offers, and account manager assignment
+        - **Score 4-5**: Proactive outreach through email campaigns, service reviews, and upgrade incentives
+        - **Score 0-3**: Standard loyalty programs with rewards points, referral bonuses, and upsell opportunities
         """)
 
     with col2:
         st.info("""
-        Customer Segmentation
+        **Customer Segmentation**
                 
-        - Risk based pricing: Offer 10-20% discounts to high-risk customers to improve retention
-        - Customized service levels: High-risk customers get priority support and dedicated account managers
-        - Differentiated communication: Tailor messaging frequency and channel based on risk profile
+        - **Risk based pricing**: Offer 10-20% discounts to high-risk customers to improve retention
+        - **Customized service levels**: High-risk customers get priority support and dedicated account managers
+        - **Differentiated communication**: Tailor messaging frequency and channel based on risk profile
         """)
 
     with col3:
         st.info("""
-        Predictive Modeling
+        **Predictive Modeling**
                 
-        - Feature engineering foundation: Risk score can be used as input variable in machine learning models
-        - Model input variable: Compare ML predictions against risk score to ensure business logic alignment
-        - Business rule validation: Deploy risk score calculation for real-time customer assessment
+        - **Feature engineering foundation**: Risk score can be used as input variable in machine learning models
+        - **Model input variable**: Compare ML predictions against risk score to ensure business logic alignment
+        - **Business rule validation**: Deploy risk score calculation for real-time customer assessment
         """)
 
     # Risk score implications
@@ -712,13 +710,234 @@ def show_risk_analysis():
     total_customers = sum(risk_data['customer_counts'])
 
     st.warning(f"""
-    Strategic Insight: {high_risk_count:,} customers ({high_risk_count/total_customers:.1%} of total) have risk scores of 6 or higher, representing the highest-priority segment for immediate retention efforts.
+    **Strategic Insight**: {high_risk_count:,} customers ({high_risk_count/total_customers:.1%} of total) have risk scores of 6 or higher, representing the highest-priority segment for immediate retention efforts.
     """)
 
 
 def show_recommendations():
     st.header("Business Recommendations")
-    st.write()
+    
+    data = load_data()
+
+    # Executive summary of the problem
+    st.markdown("""
+    **Strategic Action Plan**
+                
+    Based on conprehensive churn analysis, here are prioritized recommendation to reduce customer churn and improve retention across key risk segments.
+    """)
+
+    st.markdown("---")
+
+    # Priority recommendations with impact estimates
+    st.subheader("Priority Recommendations")
+
+    # Priority 1
+    st.markdown("### 1. Fix Fiber Optic Customer Acquisition Strategy")
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.write("""
+        **Problem**: Fiber customers show 41.9% churn rate due to compound risk factors
+                 
+        **Root Cause**: Attracting commitment-averse customers to premium service
+                 
+        **Solutions**:
+        - Offer 20-30% contract discounts for fiber customers who sign 1+ year agreements
+        - Provide additional 5-10% discounts for automatic payment enrollment
+        - Restructure marketing to target stability-seeking customers, not price-sensitive ones
+        - Create "Fiber + Commitment" bundles with enhanced value proposition
+        """)
+
+    with col2:
+        fiber_customers = len(data[data['InternetService'] == 'Fiber optic'])
+        potential_saves = int(fiber_customers * 0.17) #17% improvement estimate
+
+        st.success(f"""
+        **Expected Impact**
+                   
+        - **Customers at risk**: {fiber_customers:,}
+        - **If we acheive 17% improvement**: {potential_saves:,} customers retained
+        - **Target**: Reduce 41.9% churn to ~25%
+        - **Timeline**: 3-6 months
+        """)
+
+    st.markdown("---")
+
+    # Priority 2
+    st.markdown("### 2. Implement Risk-based Retention Program")
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.write("""
+        **Problem**: Reactive approach to churn - customers leave before intervention
+                 
+        **Solution**: Deploy risk scoring model for proactive retention
+                 
+        **Implementation**:
+        - **Score 6-7**: immediate personal outreach with retention specialists
+        - **Score 4-5**: Automated email campaings with service optimization offers
+        - **Score 0-3**: Standard loyalty programs and upselling opportunities
+        - **Monthly scoring**: Recalculate risk scores to catch changes in customer behavior
+        """)
+
+    with col2:
+        high_risk_customers = len(data[calculate_risk_scores(data) >= 6])
+        medium_risk_customers = len(data[(calculate_risk_scores(data) >= 4) & (calculate_risk_scores(data) < 6)])
+
+        st.success(f"""
+        **Expected Impact**
+
+        - **High-risk customers**: {high_risk_customers:,}
+        - **Medium-risk customers**: {medium_risk_customers:,}
+        - **If program achieves 15% improvement in high-risk customers**: {int(high_risk_customers * 0.15)} customers retained
+        - **Timeline**: 1-2 months
+        """)
+
+    st.markdown("---")
+
+    # Priority 3
+    st.markdown("### 3. Payment Method Migration Campaign")
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.write("""
+        **Problem**: Electronic check customers have 45.3% churn vs 15.2% for automatic payments
+                 
+        **Solution**: Incentivize migration to automatic payment methods
+                 
+        **Implementation**:
+        - **Financial Incentives**: $5-10/month discount for automatic payment conversion
+        - **Education campaign**: Highlight convenience and reliability benefits
+        - **Targeted outreach**: Focus on high-risk customers using electronic check
+        - **Gradual rollout**: Start with new customers, then target existing customers
+        """)
+
+    with col2:
+        electronic_check_customers = len(data[data['PaymentMethod'] == 'Electronic check'])
+        conversion_potential = int(electronic_check_customers * 0.3) # 30% conversion estimate
+
+        st.success(f"""
+        **Expected Impact**
+                   
+        - **Target customers**: {electronic_check_customers:,}
+        - **If 30% convert**: {conversion_potential:,} customers retained
+        - **Timeline**: 2-4 months
+        """)
+
+    st.markdown("---")
+
+    # Implementation roadmap
+    st.subheader("Implementation Roadmap")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info("""
+        **Phase 1 (Month 1-2)**
+                
+        - Deploy risk scoring system
+        - Launch retention program
+        - Begin payment method campaign
+        """)
+
+    with col2:
+        st.info("""
+        **Phase 2 (Month 3-4)**
+                
+        - Implement fiber acquisition changes
+        - Analyze early results
+        - Refine targeting strategies
+        """)
+
+    with col3:
+        st.info("""
+        **Phase 3 (Month 5-6)**
+                
+        - Scale successful programs
+        - Measure full impact
+        - Plan next optimization cycle
+        """)
+
+    st.markdown("---")
+
+    # Success metrics
+    st.subheader("Success Metrics")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("""
+        **Primary KPIs**:
+        - **Overall churn rate**: reduction from 26.5% to <20%
+        - **Fiber optic churn**: reduction from 41.9% to ~25%
+        - **High-risk customer retention**: improvement by 15%
+        - **Payment method conversion**: rate of 25-30%
+        """)
+
+    with col2:
+        st.write("""
+        **Secondary Metrics**:
+        - **Customer lifetime value** increase
+        - **Revenue retention** improvement
+        - **Customer satisfaction** scores
+        - **Cost per acquisition** optimization
+        """)
+
+    st.markdown("---")
+
+    # Resource requirements
+    st.subheader("Resource Requirements")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.warning("""
+        **Technology**
+                   
+        - Risk scoring system deployment
+        - Automated campaign tools
+        - Customer segmentation platform
+        """)
+
+    with col2:
+        st.warning("""
+        **Personnel**
+                   
+        - Retention specialists (2-3 FTE)
+        - Campaign managers
+        - Data analyst support
+        """)
+
+    with col3:
+        st.warning("""
+        **Budget**
+        
+        - Customer incentives/discounts
+        - Technology implementation
+        - Staff training and support
+        """)
+
+    st.markdown("---")
+
+    #Final call to action
+    current_churn = (data['Churn'] == 'Yes').mean()
+    annual_churned = int(len(data) * current_churn)
+
+    st.error(f"""
+    **Urgency**: With {annual_churned:,} customers churning annually at the current {current_churn:.1%} rate, implementing these recommendation could save 500-1,000 customers per year and significantly improve revenue retention.
+    """)
+
+    st.success("""
+    **Next Steps**:
+    1. Secure stakeholder buy-in for phased implementation
+    2. Allocate resources for Phase 1 deployment
+    3. Establish measurement framework for tracking success
+    4. Begin immediate deployment of risk scoring system
+    """)
+
 
 if __name__ == "__main__":
     main()
